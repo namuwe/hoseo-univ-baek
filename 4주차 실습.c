@@ -3,16 +3,16 @@
 #define NUM 5
 
 void menu(int* select);
-void buyGoods(int* buy);
-void sellGoods(int* sell);
-void howManyGoods(int* sell, int* buy, char* name);
-void addName(char* name);
+void buyGoods(int buy[100]);
+void sellGoods(int sell[100]);
+void howManyGoods(int sell[100], int buy[100], char name[NUM][100]);
+void addName(char name[NUM][100]);
 
 int main()
 {
 	int buy[100] = { 0 };
 	int sell[100] = { 0 };
-	char name[NUM] [100] = { "0" };
+	char* name[NUM][100] = { {"0"},{"0"}};
 	int select = 0;
 	int i = 0;
 
@@ -30,7 +30,6 @@ int main()
 			break;
 		case 3:
 			howManyGoods(sell, buy, name);
-
 			break;
 		case 4:
 			addName(name);
@@ -44,6 +43,7 @@ int main()
 	return 0;
 }
 
+//메뉴 출력
 void menu(int* select)
 {
 	printf("[쇼핑몰 관리 프로그램]\n");
@@ -52,7 +52,8 @@ void menu(int* select)
 	scanf("%d", select);
 }
 
-void buyGoods(int* buy)		//구매 입력
+//구매 입력
+void buyGoods(int buy[100])
 {
 	int i = 0;
 	int ID = 0;
@@ -77,7 +78,8 @@ void buyGoods(int* buy)		//구매 입력
 	}
 }
 
-void sellGoods(int* sell)	//판매 입력
+//판매 입력
+void sellGoods(int sell[100])
 {
 	int i = 0;
 	int ID = 0;
@@ -101,7 +103,8 @@ void sellGoods(int* sell)	//판매 입력
 	}
 }
 
-void howManyGoods(int* sell, int* buy, char* name)		//계산
+//계산 및 출력
+void howManyGoods(int sell[100], int buy[100], char name[NUM][100])
 {
 	int i = 0;
 	int high = sell[0];
@@ -132,26 +135,29 @@ void howManyGoods(int* sell, int* buy, char* name)		//계산
 		all_sell += sell[i];
 	}
 
-	printf("상품의 남은 수량 :");			//남은 수량 표시
+	//남은 수량 표시
+	printf("상품의 남은 수량 :");
 	for (int i = 0; i < NUM; i++)
 		printf("%3d", buy[i] - sell[i]);
 	printf("\n");
 
-	printf("총 판매량 : %d (판매율 : %.2f)\n", all_sell, (float)all_sell / (float)all_buy * 100);		//판매량, 판매율 표시
+	//판매량, 판매율 표시
+	printf("총 판매량 : %d (판매율 : %.2f)\n", all_sell, (float)all_sell / (float)all_buy * 100);		
 
-	printf("가장 많이 팔린 상품 ID : %d, 상품명 : %s, %d개\n", high_ID, &name[(high_ID - 1)*30], high);	//오류있음
-	printf("가장 적게 팔린 상품 ID : %d, 상품명 : %s, %d개\n", low_ID, &name[(low_ID - 1)*30], low);		//오류있음22
-
+	printf("가장 많이 팔린 상품 ID : %d, 상품명 : %s, %d개\n", high_ID, name[high_ID-1], high);
+	printf("가장 적게 팔린 상품 ID : %d, 상품명 : %s, %d개\n", low_ID, name[low_ID-1], low);
 	for (i = 0;i < NUM;i++)
 		if (buy[i] - sell[i] <= 2)
-			printf("ID %d, 상품명 : %s, 상품이 부족합니다. (남은 갯수 : %d)\n", i + 1,&name[i], buy[i] - sell[i]);
+			printf("ID %d, 상품명 : %s, 상품이 부족합니다. (남은 갯수 : %d)\n", i + 1,name[i], buy[i] - sell[i]);
 }
-void addName(char(*name)[100])
+
+//이름 입력
+void addName(char name[NUM][100])
 {
 	int i = 0;
 	for (i = 0;i < NUM;i++)
 	{
 		printf("ID %d의 상품명을 입력해주세요.\n", i + 1);
-		scanf("%s", &name[i] [0]);
+		scanf("%s", name[i]);
 	}
 }
