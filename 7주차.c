@@ -83,8 +83,7 @@ void buyGoods(GOODS G[])
 				printf("등록 가능한 상품수 상한에 도달했습니다.(최대 등록 가능한 상품수 : 5개)\n");
 			}
 			else {
-				printf("상품 ID를 입력해 주세요.\n");
-				scanf("%d", &(G + i_find_ID)->ID);
+				(G + i_find_ID)->ID = (i_find_ID + 1);
 				printf("상품명을 입력해 주세요.\n");
 				scanf("%s", (G + i_find_ID)->name);
 				printf("상품 입고량을 입력해 주세요.\n");
