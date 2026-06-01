@@ -1,25 +1,32 @@
 package com.game;
 
 import javax.swing.*;
+
+import com.game.Character.Player;
+
 import java.awt.*;
 import java.awt.event.*;
 
-class MainFrame extends JFrame {
+class MainFrame extends JFrame implements KeyListener {
 	int windowWidth = 1920;
 	int windowHeight = 1080;
 	int buttonWidth = 200;
 	int buttonHeight = 60;
-	int worldNumber = 1;
-	int mapNumber = 3;
+	int worldNumber = 0;
+	int mapNumber = 0;
 	
 	Image mainmenuImage=new ImageIcon(Main.class.getResource("/image/mainmenu.jpg")).getImage();
 	ImagePanel mainmenuPanel = new ImagePanel(mainmenuImage);
+	
+	JPanel mapPanel;
 	
 	public MainFrame () {
 		this.setTitle("untitled RPG game");
 		this.setSize(windowWidth,windowHeight);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
+		this.addKeyListener(this);
+		this.setFocusable(true);
 		this.setResizable(false);
 		mainmenuPanel.setLayout(null);
 		
@@ -43,49 +50,94 @@ class MainFrame extends JFrame {
 		this.setVisible(true);
 	}
 	
-	class startButtonAction implements ActionListener {
+	
+	class startButtonAction implements ActionListener {		//시작버튼 액선
 		public void actionPerformed (ActionEvent a) {
-			JButton button = (JButton) a.getSource();
 			System.out.println("게임시작 버튼 작동");
 			Map mainMap = new Map();
 			remove(mainmenuPanel);
-			JPanel mapPanel = mainMap.printMap(worldNumber, mapNumber);
+			mapPanel = mainMap.printMap(worldNumber, mapNumber);
 			int mapRows = mainMap.getMapRows();
 			int mapCols = mainMap.getMapCols();
 			setSize(mapCols*50,mapRows*50);
 			add(mapPanel);
 			setLocationRelativeTo(null);
-			revalidate();
+			revalidate();	//컴포넌트 재배치
             repaint();
+            requestFocusInWindow();		//키 입력 초점을 윈도우로 변경
 		}
 	}
-}
 
-class exitButtonAction implements ActionListener {
-	public void actionPerformed (ActionEvent a) {
-		JButton button = (JButton) a.getSource();
-		System.exit(0);
+	class exitButtonAction implements ActionListener {		//종료버튼 액션
+		public void actionPerformed (ActionEvent a) {
+			System.exit(0);		//창 닫기
+		}
 	}
-}
-class ImagePanel extends JPanel {
-	private Image image;
+	class ImagePanel extends JPanel {
+		private Image image;
 	
-	public ImagePanel(Image image) {
-        this.image = image;
-        setLayout(null); // 버튼들을 자유롭게 배치하기 위해 null 레이아웃 유지
-    }
+		public ImagePanel(Image image) {
+			this.image = image;
+			setLayout(null);
+		}
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			if (image != null) {
+				g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+			}
+		}
+	}
 	@Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g); // 원래 JPanel이 해야 할 기본 배경 그리기 작업 수행
-        if (image != null) {
-            // 이 패널의 크기(getWidth(), getHeight())에 맞춰 이미지를 가득 채워 그립니다.
-            g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
-        }
-    }
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void keyPressed(KeyEvent e) {
+		Character.Player player = new Character.Player();
+		MapData data = new MapData();
+		
+		
+		int KeyCode  = e.getKeyCode();
+		switch(KeyCode) {
+		case KeyEvent.VK_UP:
+			if(data.allMapData[worldNumber][mapNumber][player.getX()-1][Player.getY()]==0)
+				player.setX(player.getX()-1);
+			break;
+		case KeyEvent.VK_DOWN:
+			if(data.allMapData[worldNumber][mapNumber][player.getX()+1][Player.getY()]==0)
+				player.setX(player.getX()+1);
+			break;
+		case KeyEvent.VK_LEFT:
+			if(data.allMapData[worldNumber][mapNumber][player.getX()][Player.getY()-1]==0)
+				player.setY(player.getY()-1);
+			break;
+		case KeyEvent.VK_RIGHT:
+			if(data.allMapData[worldNumber][mapNumber][player.getX()][Player.getY()+1]==0)
+				player.setY(player.getY()+1);
+			break;
+		}
+		System.out.println("x = "+Player.getX());
+		System.out.println("y = "+Player.getY());
+		
+		remove(mapPanel);
+		Map changeMap = new Map();
+		mapPanel = changeMap.printMap(worldNumber, mapNumber);
+		this.add(mapPanel);
+		this.revalidate();
+		this.repaint();
+		
+		
+	}
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 public class Main {
-
 	public static void main(String[] args) {
 		new MainFrame();
 	}
