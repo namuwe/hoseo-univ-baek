@@ -4,9 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Map extends MapData{
-	int mapRows = 0;
-	int mapCols = 0;
+public class Map extends MapData {
+	static int mapRows = 0;
+	static int mapCols = 0;
+	Image tileImage;
+	Image wallImage;
+	Image treeImage;
+	Image rocksImage;
+	Image woterImage;
+	Image houseImage = new ImageIcon(getClass().getResource("/image/house.png")).getImage();
+	tilePanel[][] mapTilePanel;
+	JPanel mapMainPanel;
 	
 	public int getMapRows() {
 		return mapRows;
@@ -15,33 +23,39 @@ public class Map extends MapData{
 	public int getMapCols() {
 		return mapCols;
 	}
-	
-	public JPanel printMap(int worldNumber,int mapNumber) {
-		mapRows = allMapData[worldNumber][mapNumber].length;
-		mapCols = allMapData[worldNumber][mapNumber][0].length;
-		JPanel mapMainPanel = new JPanel();
-		JPanel[][] mapTilePanel = new JPanel[mapRows][mapCols];
-		mapMainPanel.setLayout(new GridLayout(mapRows,mapCols,0,0));
-		//이미지
-		Image tileImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
-		Image wallImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
-		Image treeImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
-		Image rocksImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
-		Image woterImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
-		
+	public void changeImage (int worldNumber) {	//이미지 변경
 		switch(worldNumber) {
-		case 0:	//마을 이미지 적용
-		case 1:	//숲 이미지 적용
+		case 0:		//마을
+		case 1:		//숲
 			tileImage = new ImageIcon(getClass().getResource("/image/forest_tile.png")).getImage();
 			wallImage = new ImageIcon(getClass().getResource("/image/forest_wall.png")).getImage();
 			treeImage = new ImageIcon(getClass().getResource("/image/forest_tree.png")).getImage();
 			rocksImage = new ImageIcon(getClass().getResource("/image/forest_rocks.png")).getImage();
 			woterImage = new ImageIcon(getClass().getResource("/image/forest_woter.png")).getImage();
 			break;
-		default:
+		case 2:		//사막
+			break;
+		default:	//worldNumber값이 숲~고대유적 값이 아닐때
+			tileImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
+			wallImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
+			treeImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
+			rocksImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
+			woterImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
 			System.out.println("맵 이미지 적용중 오류가 발생하였습니다.");
 			break;
+			}
 		}
+	
+	public JPanel printMap(int worldNumber,int mapNumber) {
+		mapRows = allMapData[worldNumber][mapNumber].length;
+		mapCols = allMapData[worldNumber][mapNumber][0].length;
+		mapMainPanel = new JPanel();
+		mapTilePanel = new tilePanel[mapRows][mapCols];
+		mapMainPanel.setLayout(new GridLayout(mapRows,mapCols,0,0));
+		Character.Player player = new Character.Player();
+		
+		changeImage(worldNumber);		//월드에 따라 이미지 변경
+		
 		for(int i=0;i<mapRows;i++) {
 			for(int j=0;j<mapCols;j++) {
 				switch(allMapData[worldNumber][mapNumber][i][j]) {
@@ -57,8 +71,9 @@ public class Map extends MapData{
 				case 3:	//바위
 					mapTilePanel[i][j] = new tilePanel(rocksImage);
 					break;
-				//case 4:
-					
+				case 4:	//집
+					mapTilePanel[i][j] = new tilePanel(houseImage);
+					break;
 				case 5:	//물
 					mapTilePanel[i][j] = new tilePanel(woterImage);
 					break;
@@ -66,28 +81,42 @@ public class Map extends MapData{
 					mapTilePanel[i][j] = new tilePanel(tileImage);
 					break;
 				}
+				if (player.getX() == i && player.getY() == j)
+					mapTilePanel[i][j].setObjectImage(Character.Player.PlayerImage);
+				
 				mapMainPanel.add(mapTilePanel[i][j]);
 			}
 		}
-		
 		return mapMainPanel;
 	}
-	
 }
 
 class tilePanel extends JPanel {
-    private Image image;
+    private Image bgImage;       //바닥 이미지
+    private Image objectImage;   //오브첵트 이미지
 
-    public tilePanel(Image image) {
-        this.image = image;
+    public tilePanel(Image bgImage) {	//타일 그릴 때 사용
+        this.bgImage = bgImage;
+        setLayout(null); 
+    }
+
+    public void setObjectImage(Image objectImage) {	//타일 위에 오브젝트 올릴 때 사용
+        this.objectImage = objectImage;
+        repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (image != null) {
-            // 타일 패널 크기에 맞게 이미지를 꽉 채워 그립니다.
-            g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+        super.paintComponent(g); // 패널 초기화
+        
+        //배경 그리기
+        if (bgImage != null) {
+            g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+        }
+        
+        //오브젝트 올리기
+        if (objectImage != null) {
+            g.drawImage(objectImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
 }
