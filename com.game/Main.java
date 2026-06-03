@@ -3,6 +3,7 @@ package com.game;
 import javax.swing.*;
 
 import com.game.Character.Player;
+import com.game.Move.CheckMove;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,7 +19,6 @@ class MainFrame extends JFrame implements KeyListener {
 	Map map = new Map();
 	Character.Player player = new Character.Player();
 	MapData data = new MapData();
-	CheckMove move = new CheckMove();
 	
 	JPanel mapPanel;
 	
@@ -121,7 +121,7 @@ class MainFrame extends JFrame implements KeyListener {
 		System.out.println("y = "+Player.getY());
 		
 		remove(mapPanel);
-		mapPanel = move.CheakMove(map.getWorldNum(), map.getMapNum(), map, player);
+		mapPanel = Move.CheakMove(map.getWorldNum(), map.getMapNum(), map, player);
 		this.add(mapPanel);
 		this.setSize(map.getMapCols()*50,map.getMapRows()*50);
 		this.setLocationRelativeTo(null);
