@@ -7,6 +7,8 @@ import java.awt.event.*;
 public class Map extends MapData {
 	static int mapRows = 0;
 	static int mapCols = 0;
+	int worldNum = 0;
+	int mapNum = 0;
 	Image tileImage;
 	Image wallImage;
 	Image treeImage;
@@ -16,13 +18,27 @@ public class Map extends MapData {
 	tilePanel[][] mapTilePanel;
 	JPanel mapMainPanel;
 	
-	public int getMapRows() {
+	public int getMapRows() {		//맵 출력할 때 사용
 		return mapRows;
 	}
-	
-	public int getMapCols() {
+	public int getMapCols() {		//맵 출력할 때 사용
 		return mapCols;
 	}
+	public int getWorldNum() {		//현재 월드 번호 불러오기
+		return worldNum;
+	}
+	public int setWorldNum(int num) {	//현재 월드 번호 수정하기
+		worldNum = num;
+		return worldNum;
+	}
+	public int getMapNum() {		//현재 맵 번호 불러오기
+		return mapNum;
+	}
+	public int setMapNum(int num) {	//현재 맵 번호 수정하기
+		mapNum = num;
+		return mapNum;
+	}
+	
 	public void changeImage (int worldNumber) {	//이미지 변경
 		switch(worldNumber) {
 		case 0:		//마을
