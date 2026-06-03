@@ -8,8 +8,8 @@ public class Character {
 
 	public static class Player {
 		private static final String name = "테스트";
-		private static int x = 5;
-		private static int y = 4;
+		private static int x = 4;
+		private static int y = 6;
 		public static final Image PlayerImage = new ImageIcon(Character.class.getResource("/image/player.png"))
 				.getImage();
 		public static int getX() {
