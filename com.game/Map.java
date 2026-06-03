@@ -49,7 +49,26 @@ public class Map extends MapData {
 			rocksImage = new ImageIcon(getClass().getResource("/image/forest_rocks.png")).getImage();
 			woterImage = new ImageIcon(getClass().getResource("/image/forest_woter.png")).getImage();
 			break;
-		case 2:		//사막
+		case 2:		//동굴
+			tileImage = new ImageIcon(getClass().getResource("/image/forest_tile.png")).getImage();
+			wallImage = new ImageIcon(getClass().getResource("/image/forest_wall.png")).getImage();
+			treeImage = new ImageIcon(getClass().getResource("/image/forest_tree.png")).getImage();
+			rocksImage = new ImageIcon(getClass().getResource("/image/forest_rocks.png")).getImage();
+			woterImage = new ImageIcon(getClass().getResource("/image/forest_woter.png")).getImage();
+			break;
+		case 3:		//사막
+			tileImage = new ImageIcon(getClass().getResource("/image/desert_tile.png")).getImage();
+			wallImage = new ImageIcon(getClass().getResource("/image/desert_wall.png")).getImage();
+			treeImage = new ImageIcon(getClass().getResource("/image/desert_tree.png")).getImage();
+			rocksImage = new ImageIcon(getClass().getResource("/image/desert_rocks.png")).getImage();
+			woterImage = new ImageIcon(getClass().getResource("/image/desert_woter.png")).getImage();
+			break;
+		case 4:		//고대유적
+			tileImage = new ImageIcon(getClass().getResource("/image/forest_tile.png")).getImage();
+			wallImage = new ImageIcon(getClass().getResource("/image/forest_wall.png")).getImage();
+			treeImage = new ImageIcon(getClass().getResource("/image/forest_tree.png")).getImage();
+			rocksImage = new ImageIcon(getClass().getResource("/image/forest_rocks.png")).getImage();
+			woterImage = new ImageIcon(getClass().getResource("/image/forest_woter.png")).getImage();
 			break;
 		default:	//worldNumber값이 숲~고대유적 값이 아닐때
 			tileImage = new ImageIcon(getClass().getResource("/image/x.png")).getImage();
