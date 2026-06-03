@@ -12,11 +12,13 @@ class MainFrame extends JFrame implements KeyListener {
 	int windowHeight = 1080;
 	int buttonWidth = 200;
 	int buttonHeight = 60;
-	int worldNumber = 0;
-	int mapNumber = 0;
 	
 	Image mainmenuImage=new ImageIcon(Main.class.getResource("/image/mainmenu.jpg")).getImage();
 	ImagePanel mainmenuPanel = new ImagePanel(mainmenuImage);
+	Map map = new Map();
+	Character.Player player = new Character.Player();
+	MapData data = new MapData();
+	CheckMove move = new CheckMove();
 	
 	JPanel mapPanel;
 	
@@ -52,11 +54,12 @@ class MainFrame extends JFrame implements KeyListener {
 	
 	
 	class startButtonAction implements ActionListener {		//시작버튼 액선
+		Map map = new Map();
 		public void actionPerformed (ActionEvent a) {
 			System.out.println("게임시작 버튼 작동");
 			Map mainMap = new Map();
 			remove(mainmenuPanel);
-			mapPanel = mainMap.printMap(worldNumber, mapNumber);
+			mapPanel = mainMap.printMap(map.getWorldNum(), map.getMapNum());
 			int mapRows = mainMap.getMapRows();
 			int mapCols = mainMap.getMapCols();
 			setSize(mapCols*50,mapRows*50);
@@ -95,26 +98,22 @@ class MainFrame extends JFrame implements KeyListener {
 	}
 	@Override
 	public void keyPressed(KeyEvent e) {
-		Character.Player player = new Character.Player();
-		MapData data = new MapData();
-		
-		
 		int KeyCode  = e.getKeyCode();
 		switch(KeyCode) {
 		case KeyEvent.VK_UP:
-			if(data.allMapData[worldNumber][mapNumber][player.getX()-1][Player.getY()]==0)
+			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()-1][Player.getY()]==0)
 				player.setX(player.getX()-1);
 			break;
 		case KeyEvent.VK_DOWN:
-			if(data.allMapData[worldNumber][mapNumber][player.getX()+1][Player.getY()]==0)
+			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()+1][Player.getY()]==0)
 				player.setX(player.getX()+1);
 			break;
 		case KeyEvent.VK_LEFT:
-			if(data.allMapData[worldNumber][mapNumber][player.getX()][Player.getY()-1]==0)
+			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()][Player.getY()-1]==0)
 				player.setY(player.getY()-1);
 			break;
 		case KeyEvent.VK_RIGHT:
-			if(data.allMapData[worldNumber][mapNumber][player.getX()][Player.getY()+1]==0)
+			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()][Player.getY()+1]==0)
 				player.setY(player.getY()+1);
 			break;
 		}
@@ -122,12 +121,12 @@ class MainFrame extends JFrame implements KeyListener {
 		System.out.println("y = "+Player.getY());
 		
 		remove(mapPanel);
-		Map changeMap = new Map();
-		mapPanel = changeMap.printMap(worldNumber, mapNumber);
+		mapPanel = move.CheakMove(map.getWorldNum(), map.getMapNum(), map, player);
 		this.add(mapPanel);
+		this.setSize(map.getMapCols()*50,map.getMapRows()*50);
+		this.setLocationRelativeTo(null);
 		this.revalidate();
 		this.repaint();
-		
 		
 	}
 	@Override
