@@ -1,143 +1,383 @@
 package com.game;
 
 import javax.swing.*;
-
-import com.game.Character.Player;
-import com.game.Move.CheckMove;
-
 import java.awt.*;
-import java.awt.event.*;
 
-class MainFrame extends JFrame implements KeyListener {
-	int windowWidth = 1920;
-	int windowHeight = 1080;
-	int buttonWidth = 200;
-	int buttonHeight = 60;
+class Move {
+	int ex, ey;
+	int sx, sy;
+	int wx, wy;
+	int nx, ny;
+	int x, y;
+	final static int diNorth = 0;	//북
+	final static int diEast = 1;	//동
+	final static int diSouth = 2;	//남
+	final static int diWest = 3;	//서
+	final static int town = 0;		//마을
+	final static int forest = 1;	//숲
+	final static int cave = 2;		//숲
+	final static int desert = 3;	//숲
+	final static int ruins = 4;		//숲
 	
-	Image mainmenuImage=new ImageIcon(Main.class.getResource("/image/mainmenu.jpg")).getImage();
-	ImagePanel mainmenuPanel = new ImagePanel(mainmenuImage);
-	Map map = new Map();
-	Character.Player player = new Character.Player();
-	MapData data = new MapData();
+	public static int[][][][] MoveMap = {	//월드, 맵, 방위(북, 동, 남, 서), 좌표(x,y)
+			{
+				{{0,6},{4,11},{8,6},{4,0}}	//마을
+			},
+			{
+				{{0,3},{0,0},{8,8},{0,0}},	//숲1
+				{{0,2},{4,4},{8,2},{0,0}},	//숲2
+				{{0,0},{0,0},{0,0},{2,0}},	//숲3
+				{{0,0},{0,0},{8,5},{0,0}},	//숲4
+			},
+			{
+				{{0,0},{5,9},{0,0},{5,0}},	//동굴1
+				{{0,0},{5,9},{0,0},{5,0}},	//동굴2
+				{{0,0},{5,9},{0,0},{5,0}},	//동굴3
+				{{0,0},{0,0},{0,0},{5,0}},	//동굴4
+			},
+			{
+				{{0,9},{10,19},{19,9},{0,0}},	//사막1
+				{{0,0},{0,0},{19,9},{10,0}},	//사막2
+				{{0,9},{0,0},{0,0},{10,0}},		//사막3
+				{{0,9},{10,19},{0,0},{0,0}},	//사막4
+			},
+			{
+				{{0,0},{7,14},{14,7},{7,0}},	//고대유적1
+				{{0,0},{7,14},{14,6},{0,0}},	//고대유적2
+				{{0,6},{7,14},{0,0},{0,0}},		//고대유적3
+				{{0,7},{0,0},{14,7},{7,0}},		//고대유적4
+				{{0,5},{0,0},{0,0},{0,0}}		//고대유적5	(보스룸)
+			}
+	};
 	
-	JPanel mapPanel;
-	
-	public MainFrame () {
-		this.setTitle("untitled RPG game");
-		this.setSize(windowWidth,windowHeight);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLocationRelativeTo(null);
-		this.addKeyListener(this);
-		this.setFocusable(true);
-		this.setResizable(false);
-		mainmenuPanel.setLayout(null);
-		
-		Font buttonFont = new Font("고딕", Font.PLAIN, 20);
-		
-		//시작버튼
-		JButton startButton = new JButton("게임 시작");
-		startButton.setBounds(windowWidth/2-buttonWidth/2,windowHeight-buttonHeight*5, 200, 60);
-		startButton.setFont(buttonFont);
-		startButton.addActionListener(new startButtonAction());
-		mainmenuPanel.add(startButton);
-		
-		//종료버튼
-		JButton exitButton = new JButton("게임 종료");
-		exitButton.setBounds(windowWidth/2-buttonWidth/2,windowHeight-(buttonHeight*4-15), 200, 60);
-		exitButton.setFont(buttonFont);
-		exitButton.addActionListener(new exitButtonAction());
-		mainmenuPanel.add(exitButton);
-		
-		this.add(mainmenuPanel);
-		this.setVisible(true);
-	}
-	
-	
-	class startButtonAction implements ActionListener {		//시작버튼 액선
-		Map map = new Map();
-		public void actionPerformed (ActionEvent a) {
-			System.out.println("게임시작 버튼 작동");
-			Map mainMap = new Map();
-			remove(mainmenuPanel);
-			mapPanel = mainMap.printMap(map.getWorldNum(), map.getMapNum());
-			int mapRows = mainMap.getMapRows();
-			int mapCols = mainMap.getMapCols();
-			setSize(mapCols*50,mapRows*50);
-			add(mapPanel);
-			setLocationRelativeTo(null);
-			revalidate();	//컴포넌트 재배치
-            repaint();
-            requestFocusInWindow();		//키 입력 초점을 윈도우로 변경
-		}
-	}
+	public static int getExitDirection(int world, int map, int px, int py) {
+        if (world >= MoveMap.length || map >= MoveMap[world].length) return -1;
 
-	class exitButtonAction implements ActionListener {		//종료버튼 액션
-		public void actionPerformed (ActionEvent a) {
-			System.exit(0);		//창 닫기
-		}
-	}
-	class ImagePanel extends JPanel {
-		private Image image;
+        for (int dir = 0; dir < 4; dir++) {
+        	int exitX = MoveMap[world][map][dir][0];
+        	int exitY = MoveMap[world][map][dir][1];
+        	
+        	if (px == exitX && py == exitY && exitX != -1)
+        		return dir; // 0:북, 1:동, 2:남, 3:서
+        }
+        return -1;
+    }
 	
-		public ImagePanel(Image image) {
-			this.image = image;
-			setLayout(null);
-		}
-		@Override
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			if (image != null) {
-				g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+	class CheckMove extends Move {
+		Move getXY = new Move();
+	}
+		static JPanel mapPanel = new JPanel();
+		public static JPanel CheakMove(int worldNum, int mapNum, Map map, Character.Player player) {
+			int dir = getExitDirection(worldNum, mapNum, player.getX(), player.getY());
+			if(dir != -1) {
+				System.out.println("맵 이동");
+				switch(worldNum) {
+				case town:		//마을
+					switch(dir) {	//마을
+					case diNorth:
+						map.setWorldNum(1);
+	                    map.setMapNum(0);
+	                    player.setX(7);
+	                    player.setY(8);
+	                    break;
+					case diEast:
+						map.setWorldNum(2);
+	                    map.setMapNum(0);
+	                    player.setX(5);
+	                    player.setY(1);
+						break;
+					case diSouth:
+						map.setWorldNum(3);
+	                    map.setMapNum(0);
+	                    player.setX(1);
+	                    player.setY(9);
+	                    break;
+					case diWest:
+						map.setWorldNum(4);
+						map.setMapNum(0);
+						player.setX(7);
+						player.setY(13);
+						break;
+					}break;
+				case forest:	//숲
+					switch(mapNum) {
+					case 0:		//숲1
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(1);
+							map.setMapNum(1);
+							player.setX(7);
+							player.setY(2);
+							break;
+						case diSouth:
+							map.setWorldNum(0);
+							map.setMapNum(0);
+							player.setX(1);
+							player.setY(6);
+							break;
+						}break;
+					case 1:		//숲2
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(1);
+							map.setMapNum(3);
+							player.setX(8);
+							player.setY(5);
+							break;
+						case diEast:
+							map.setWorldNum(1);
+							map.setMapNum(2);
+							player.setX(2);
+							player.setY(1);
+							break;
+						case diSouth:
+							map.setWorldNum(1);
+							map.setMapNum(0);
+							player.setX(1);
+							player.setY(3);
+							break;
+						}break;
+					case 2:		//숲3
+						switch(dir) {
+						case diWest:
+							map.setWorldNum(1);
+							map.setMapNum(1);
+							player.setX(4);
+							player.setY(3);
+							break;
+						}break;
+					case 3:		//숲4
+						switch(dir) {
+						case diSouth:
+							map.setWorldNum(1);
+							map.setMapNum(1);
+							player.setX(1);
+							player.setY(2);
+							break;
+						}break;
+					}break;
+					
+				case cave:		//동굴
+					switch(mapNum) {
+					case 0:		//동굴1
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(2);
+							map.setMapNum(1);
+							player.setX(5);
+							player.setY(1);
+							break;
+						case diWest:
+							map.setWorldNum(0);
+							map.setMapNum(0);
+							player.setX(4);
+							player.setY(10);
+							break;
+						}break;
+					case 1:		//동굴2
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(2);
+							map.setMapNum(2);
+							player.setX(5);
+							player.setY(1);
+							break;
+						case diWest:
+							map.setWorldNum(2);
+							map.setMapNum(0);
+							player.setX(5);
+							player.setY(8);
+							break;
+						}break;
+					case 2:		//동굴3
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(2);
+							map.setMapNum(3);
+							player.setX(5);
+							player.setY(1);
+							break;
+						case diWest:
+							map.setWorldNum(2);
+							map.setMapNum(1);
+							player.setX(5);
+							player.setY(8);
+							break;
+						}break;
+					case 3:		//동굴4
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(2);
+							map.setMapNum(3);
+							player.setX(5);
+							player.setY(1);
+							break;
+						case diWest:
+							map.setWorldNum(2);
+							map.setMapNum(2);
+							player.setX(5);
+							player.setY(8);
+							break;
+						}break;
+					}break;
+					
+				case desert:	//사막
+					switch(mapNum){
+					case 0:		//사막1
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(0);
+		                    map.setMapNum(0);
+		                    player.setX(7);
+		                    player.setY(6);
+		                    break;
+						case diEast:
+							map.setWorldNum(3);
+		                    map.setMapNum(1);
+		                    player.setX(10);
+		                    player.setY(1);
+		                    break;
+						case diSouth:
+							map.setWorldNum(3);
+		                    map.setMapNum(3);
+		                    player.setX(1);
+		                    player.setY(9);
+		                    break;
+						}break;
+					case 1:		//사막2
+						switch(dir) {
+						case diSouth:
+							map.setWorldNum(3);
+		                    map.setMapNum(2);
+		                    player.setX(1);
+		                    player.setY(9);
+		                    break;
+						case diWest:
+							map.setWorldNum(3);
+		                    map.setMapNum(0);
+		                    player.setX(10);
+		                    player.setY(18);
+		                    break;
+						}break;
+					case 2:		//사막3
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(3);
+		                    map.setMapNum(1);
+		                    player.setX(18);
+		                    player.setY(9);
+		                    break;
+						case diWest:
+							map.setWorldNum(3);
+		                    map.setMapNum(3);
+		                    player.setX(10);
+		                    player.setY(18);
+		                    break;
+						}break;
+					case 3:		//사막4
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(3);
+		                    map.setMapNum(2);
+		                    player.setX(10);
+		                    player.setY(1);
+		                    break;
+						case diNorth:
+							map.setWorldNum(3);
+		                    map.setMapNum(0);
+		                    player.setX(18);
+		                    player.setY(9);
+		                    break;
+						}break;
+					}break;
+					
+				case ruins:		//고대유적
+					switch(mapNum) {
+					case 0:		//고대유적1
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(0);
+							map.setMapNum(0);
+							player.setX(4);
+							player.setY(1);
+							break;
+						case diSouth:
+							map.setWorldNum(4);
+							map.setMapNum(3);
+							player.setX(1);
+							player.setY(7);
+							break;
+						case diWest:
+							map.setWorldNum(4);
+							map.setMapNum(1);
+							player.setX(7);
+							player.setY(13);
+							break;
+						}break;
+					case 1:		//고대유적2
+						switch(dir) {
+						case diEast:
+							map.setWorldNum(4);
+							map.setMapNum(0);
+							player.setX(7);
+							player.setY(1);
+							break;
+						case diSouth:
+							map.setWorldNum(4);
+							map.setMapNum(2);
+							player.setX(1);
+							player.setY(6);
+							break;
+						}break;
+					case 2:		//고대유적3
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(4);
+							map.setMapNum(1);
+							player.setX(13);
+							player.setY(6);
+							break;
+						case diEast:
+							map.setWorldNum(4);
+							map.setMapNum(3);
+							player.setX(7);
+							player.setY(1);
+							break;
+						}break;
+					case 3:		//고대유적4
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(4);
+							map.setMapNum(0);
+							player.setX(13);
+							player.setY(7);
+							break;
+						case diWest:
+							map.setWorldNum(4);
+							map.setMapNum(2);
+							player.setX(7);
+							player.setY(13);
+							break;
+						case diSouth:
+							map.setWorldNum(4);
+							map.setMapNum(4);
+							player.setX(1);
+							player.setY(5);
+							break;
+						}break;
+					case 4:
+						switch(dir) {
+						case diNorth:
+							map.setWorldNum(4);
+							map.setMapNum(3);
+							player.setX(13);
+							player.setY(7);
+							break;
+						}break;
+					}break;
+				}
+			}
+			mapPanel = map.printMap(map.getWorldNum(), map.getMapNum());
+			return mapPanel;
 			}
 		}
-	}
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void keyPressed(KeyEvent e) {
-		int KeyCode  = e.getKeyCode();
-		switch(KeyCode) {
-		case KeyEvent.VK_UP:
-			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()-1][Player.getY()]==0)
-				player.setX(player.getX()-1);
-			break;
-		case KeyEvent.VK_DOWN:
-			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()+1][Player.getY()]==0)
-				player.setX(player.getX()+1);
-			break;
-		case KeyEvent.VK_LEFT:
-			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()][Player.getY()-1]==0)
-				player.setY(player.getY()-1);
-			break;
-		case KeyEvent.VK_RIGHT:
-			if(data.allMapData[map.getWorldNum()][map.getMapNum()][player.getX()][Player.getY()+1]==0)
-				player.setY(player.getY()+1);
-			break;
-		}
-		System.out.println("x = "+Player.getX());
-		System.out.println("y = "+Player.getY());
-		
-		remove(mapPanel);
-		mapPanel = Move.CheakMove(map.getWorldNum(), map.getMapNum(), map, player);
-		this.add(mapPanel);
-		this.setSize(map.getMapCols()*50,map.getMapRows()*50);
-		this.setLocationRelativeTo(null);
-		this.revalidate();
-		this.repaint();
-		
-	}
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-}
-
-public class Main {
-	public static void main(String[] args) {
-		new MainFrame();
-	}
-}
